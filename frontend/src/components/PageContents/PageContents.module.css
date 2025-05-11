@@ -1,0 +1,18 @@
+.container {
+    background-color: var(--container);
+    margin: 0 auto;
+    max-width: 1400px;
+    min-height: 70vh;
+    height: auto;
+    padding: 0px;
+    color: var(--black);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+    @media (min-width: 768px) {
+    margin: 3rem auto;
+    }
+}
+
+.container * {
+    color: inherit;
+}
