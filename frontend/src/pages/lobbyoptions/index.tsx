@@ -31,7 +31,7 @@ const LobbyOptions = () => {
             
         }
         const SID = getCookie("SID");
-        const socket = new WebSocket(`ws://localhost:8080/game/${SID}`)
+        const socket = new WebSocket(`ws://localhost:8080/game/${SID}/${accessToken}`)
         
         socket.addEventListener("open", (event) => {
         socket.send("Connection established")
@@ -83,6 +83,7 @@ const LobbyOptions = () => {
             <div>
                 <button onClick={handleStartClick}>Start game!</button>
             </div>
+            <div>Join with code{getCookie("SID")}</div>
         </>
     )
 }

@@ -5,17 +5,29 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+
+	"main/game"
 )
 
-var gameServers = make(map[string]GameServer)
+var letters = []rune("abcdefghijklmnopqrstuvwxyz1234567890")
+
+func genRandomString(n int) string {
+	sequence := make([]rune, n)
+	for i := range sequence {
+		sequence[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(sequence)
+}
+
+var gameServers = make(map[string]game.GameServer)
 
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
@@ -111,7 +123,18 @@ func spotifyCallback(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 	})
 
-	var sessionID = uuid.New().String()
+	// Probably not needed, just send the 4 letter route
+	/* var sessionID = uuid.New().String()
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "SID",
+		Value:    sessionID,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+		Path:     "/",
+	}) */
+
+	var sessionID = genRandomString(4)
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     "SID",
@@ -121,7 +144,7 @@ func spotifyCallback(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 	})
 
-	gameServer := NewGameServer()
+	gameServer := game.NewGameServer(data.AccessToken)
 	go gameServer.Run()
 	gameServers[sessionID] = *gameServer
 
@@ -144,15 +167,69 @@ func main() {
 	router.HandleFunc("/game/{id}", func(w http.ResponseWriter, r *http.Request) {
 
 		vars := mux.Vars(r)
+
+		// debugging prints ---->
+		fmt.Print("\nMux.vars: ")
+		//fmt.Println(vars)
+		bs, _ := json.Marshal(vars)
+		fmt.Println(string(bs))
+
 		sid := vars["id"]
 		var gameServer, ok = gameServers[sid]
 
+		fmt.Print("sid: ")
+		fmt.Println(sid)
+
+		fmt.Print("Gameservers: ")
+		fmt.Println(gameServers)
+		// <------
+
 		if !ok {
 			fmt.Print("Game server not found. Returning")
+			http.Error(w, "Invalid game id", http.StatusNotFound)
 			return
 		}
-		serveGame(&gameServer, w, r)
+		// if player
+		game.ServePlayerWebsocket(&gameServer, w, r)
+		// if host -> ServeHostSocket
 	})
+
+	router.HandleFunc("/game/{id}/{token}", func(w http.ResponseWriter, r *http.Request) {
+
+		vars := mux.Vars(r)
+
+		// debugging prints ---->
+		fmt.Print("\nMux.vars: ")
+		//fmt.Println(vars)
+		bs, _ := json.Marshal(vars)
+		fmt.Println(string(bs))
+
+		sid := vars["id"]
+		var gameServer, ok = gameServers[sid]
+
+		fmt.Print("sid: ")
+		fmt.Println(sid)
+
+		fmt.Print("Gameservers: ")
+		fmt.Println(gameServers)
+		// <------
+
+		if !ok {
+			fmt.Print("Game server not found. Returning")
+			http.Error(w, "Invalid game id", http.StatusNotFound)
+			return
+		}
+
+		var accessToken = vars["token"]
+		if gameServer.AccessToken != accessToken {
+			fmt.Print("Invalid access token")
+			http.Error(w, "Invalid access token", http.StatusUnauthorized)
+			return
+		}
+		game.ServeHostWebsocket(&gameServer, w, r)
+
+	})
+
 	fmt.Printf("Server listening on port %s\n", port)
 	log.Fatal(http.ListenAndServe(port, router))
 }
