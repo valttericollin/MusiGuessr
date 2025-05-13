@@ -152,6 +152,21 @@ func spotifyCallback(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func gamePreflight(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	sid := vars["id"]
+
+	var _, ok = gameServers[sid]
+
+	if !ok {
+		fmt.Print("Game server not found. Returning")
+		http.Error(w, "Invalid game id", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -164,34 +179,19 @@ func main() {
 	router.HandleFunc("/", root)
 	router.HandleFunc("/login", login)
 	router.HandleFunc("/spotifyCallback", spotifyCallback)
+	router.HandleFunc("/game/{id}/preflight", gamePreflight)
 	router.HandleFunc("/game/{id}", func(w http.ResponseWriter, r *http.Request) {
 
 		vars := mux.Vars(r)
-
-		// debugging prints ---->
-		fmt.Print("\nMux.vars: ")
-		//fmt.Println(vars)
-		bs, _ := json.Marshal(vars)
-		fmt.Println(string(bs))
-
 		sid := vars["id"]
 		var gameServer, ok = gameServers[sid]
-
-		fmt.Print("sid: ")
-		fmt.Println(sid)
-
-		fmt.Print("Gameservers: ")
-		fmt.Println(gameServers)
-		// <------
 
 		if !ok {
 			fmt.Print("Game server not found. Returning")
 			http.Error(w, "Invalid game id", http.StatusNotFound)
 			return
 		}
-		// if player
 		game.ServePlayerWebsocket(&gameServer, w, r)
-		// if host -> ServeHostSocket
 	})
 
 	router.HandleFunc("/game/{id}/{token}", func(w http.ResponseWriter, r *http.Request) {

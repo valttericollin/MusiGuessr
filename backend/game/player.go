@@ -47,6 +47,7 @@ func (Player *Player) readPump() {
 			break
 		}
 
+		fmt.Println(jsonMessage)
 		Player.gameServer.broadcast <- jsonMessage
 	}
 }
@@ -107,5 +108,6 @@ func ServePlayerWebsocket(gameServer *GameServer, w http.ResponseWriter, r *http
 
 	fmt.Print(*Player)
 
+	// send self to server register channel
 	gameServer.registerPlayer <- Player
 }

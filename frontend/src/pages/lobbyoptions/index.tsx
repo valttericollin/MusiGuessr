@@ -4,6 +4,7 @@ import PlayListSelectButton from "../../components/PlayListSelectButton";
 const LobbyOptions = () => {
     const [playlists, setPlaylists] = useState([]);
     const [selectedPlaylist, setSelectedPlaylist] = useState();
+    const [tracks, setTracks] = useState([])
     const [players, setPlayers] = useState([])
     const connection = useRef(null);
 
@@ -39,18 +40,51 @@ const LobbyOptions = () => {
 
         // Listen for messages
         socket.addEventListener("message", (event) => {
-        console.log("Message from server ", event.data)
+            console.log("happening");
+            console.log(event.data);
+            handleMessage(event.data);
         })
         connection.current = socket
 
     }, [])
+
+    const handleMessage = (msg: string) => {
+        //Handle incoming messages from websocket
+        //TODO: other message types
+        const parsed = JSON.parse(msg)
+        if (parsed.type == "join") {
+            setPlayers([...players, parsed.name])
+        }
+    }
 
     const handlePlaylistSelect = (playlist) => {
         console.log(playlist.name)
         setSelectedPlaylist(playlist)
     }
 
-    const handleStartClick = () => {
+    const handleStartClick = async () => {
+        // get all tracks in playlist
+        const accessToken = getCookie("token")
+        let response = await fetch(`https://api.spotify.com/v1/playlists/${selectedPlaylist.id}/tracks?limit=50`, {
+            headers: {
+                Authorization : "Bearer " + accessToken
+            }
+        })
+        let data = await response.json()
+        const playlistTracks = data.items
+        while (data.next) {
+            response = await fetch(data.next)
+            data = await response.json()
+            playlistTracks.push(data)
+        }
+        setTracks(playlistTracks)
+        //TODO: transfer playback to some device to start playback.
+
+        const msg = {
+            type: "gameState",
+            action: "start"
+        }
+        connection.current.send(JSON.stringify(msg))
         setSpotifyContext();
     }
 
@@ -66,7 +100,7 @@ const LobbyOptions = () => {
                 "context_uri" : selectedPlaylist.uri
             })
         })
-
+        
         const data = await response.json();
         console.log(data);
     }
@@ -83,7 +117,16 @@ const LobbyOptions = () => {
             <div>
                 <button onClick={handleStartClick}>Start game!</button>
             </div>
-            <div>Join with code{getCookie("SID")}</div>
+            <div>
+                <h3>Join with code {getCookie("SID")}</h3>
+            </div>
+            <div>
+                {players.length > 0 ?
+                <ul>
+                    {players.map(player => <li>{player}</li>)}
+                </ul>
+                : <p>Waiting for players to join...</p>}
+            </div>
         </>
     )
 }
