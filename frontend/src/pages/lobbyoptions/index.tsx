@@ -1,20 +1,30 @@
 import { useEffect, useState, useRef} from "react"
 import PlayListSelectButton from "../../components/PlayListSelectButton";
+import Game from "../../components/Game";
+
+interface Player {
+    name: string,
+    score: number,
+    currentRoundAnswer: string
+}
 
 const LobbyOptions = () => {
     const [playlists, setPlaylists] = useState([]);
     const [selectedPlaylist, setSelectedPlaylist] = useState();
-    const [tracks, setTracks] = useState([])
-    const [players, setPlayers] = useState([])
-    const connection = useRef(null);
+    const [tracks, setTracks] = useState<Array<JSON>>([])
+    const [players, setPlayers] = useState<Array<Player>>([])
+    const [numberOfTracks, setNumberOfTracks] = useState("");
+    const [gameStarted, setGameStarted] = useState(false)
+    const connection = useRef<WebSocket>(null);
 
-    const getCookie = (name: String) => {
+    const getCookie = (name: string) => {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
     
     useEffect(() => {
+        console.log("in useEffect")
         const accessToken = getCookie("token")
         if (!accessToken) {
             window.location.href = "http://localhost:5173/createLobby"
@@ -50,11 +60,34 @@ const LobbyOptions = () => {
 
     const handleMessage = (msg: string) => {
         //Handle incoming messages from websocket
-        //TODO: other message types
+        console.log("handleMessage")
         const parsed = JSON.parse(msg)
-        if (parsed.type == "join") {
-            setPlayers([...players, parsed.name])
+        switch (parsed.type) {
+            case "join": {
+                console.log("join")
+                const newPlayer = {name: parsed.name, score: 0, currentRoundAnswer: ""}
+                setPlayers([...players, newPlayer])
+                break
+            }
+            case "submitAnswer":
+                console.log("submitAnswer")
+                console.log("cur players: ", players)
+                console.log(players.find((player) => player.name === parsed.name))
+                setPlayers(prevPlayers => 
+                    prevPlayers.map((player) =>
+                        player.name === parsed.name
+                            ? { ...player, currentRoundAnswer: parsed.answer }
+                            : player
+                    ));
+                break
+            default:
+                console.log("unrecognized message type")
+                // do stuff
         }
+    }
+
+    const resetCurrentRoundAnswers = () => {
+        setPlayers(players.map((player) => ({...player, currentRoundAnswer: ""})))
     }
 
     const handlePlaylistSelect = (playlist) => {
@@ -79,13 +112,13 @@ const LobbyOptions = () => {
         }
         setTracks(playlistTracks)
         //TODO: transfer playback to some device to start playback.
-
+        // notify server
         const msg = {
             type: "gameState",
             action: "start"
         }
         connection.current.send(JSON.stringify(msg))
-        setSpotifyContext();
+        setGameStarted(true)
     }
 
     const setSpotifyContext = async () => {
@@ -105,28 +138,62 @@ const LobbyOptions = () => {
         console.log(data);
     }
 
+    const getNextTrack = () => {
+        const nextTrack = tracks[tracks.length - 1]
+        setTracks(tracks.pop())
+        return nextTrack
+    }
+
+    const handleNumberOfSongschange = (event) => {
+        let input = event.target.value
+        if (input.length == 0) {
+            setNumberOfTracks("")
+            return
+        }
+        input = parseInt(input)
+        if (!Number.isNaN(input) && 0 < input && input < 13) {
+            setNumberOfTracks(input)
+        }
+    }
+
 
     return (
         <>
-            <div>
-                <h1>Lobby options over here</h1>
-            </div>
-            <div>
-                {playlists.map((playlist) => <PlayListSelectButton key={playlist.name} playlist={playlist} handlePlaylistSelect={handlePlaylistSelect}></PlayListSelectButton>)}
-            </div>
-            <div>
-                <button onClick={handleStartClick}>Start game!</button>
-            </div>
-            <div>
-                <h3>Join with code {getCookie("SID")}</h3>
-            </div>
-            <div>
-                {players.length > 0 ?
-                <ul>
-                    {players.map(player => <li>{player}</li>)}
-                </ul>
-                : <p>Waiting for players to join...</p>}
-            </div>
+            {!gameStarted && // probably should be made into its own component
+            <>
+                <div>
+                    <h1>Lobby options over here</h1>
+                </div>
+                <div>
+                    {playlists.map((playlist) => <PlayListSelectButton key={playlist.name} playlist={playlist} handlePlaylistSelect={handlePlaylistSelect}></PlayListSelectButton>)}
+                </div>
+                <div>
+                    <button onClick={handleStartClick}>Start game!</button>
+                </div>
+                <div>
+                    <h3>Join with code {getCookie("SID")}</h3>
+                </div>
+                <div>
+                    <input placeholder="NUMBER OF SONGS 1-12" value={numberOfTracks} onChange={handleNumberOfSongschange} maxLength={2}/>
+                </div>
+                <div>
+                    {players.length > 0 ?
+                    <ul>
+                        {players.map(player => <li>{player.name}</li>)}
+                    </ul>
+                    : <p>Waiting for players to join...</p>}
+                </div>
+            </>
+            }
+            {gameStarted &&
+                <Game 
+                    getNextTrack={getNextTrack} 
+                    connection={connection.current} 
+                    accessToken={getCookie("token")} 
+                    players={players} 
+                    playlistUri={selectedPlaylist.uri}
+                />
+            }
         </>
     )
 }

@@ -1,9 +1,11 @@
 import { useState, useRef } from "react"
+import PlayerView from "../../components/PlayerView";
 
 const JoinLobby = () => {
   const [roomCode, setRoomCode] = useState();
   const [name, setName] = useState();
-  const connection = useRef();
+  const [connected, setConnected] = useState(false)
+  const connection = useRef<WebSocket>(null);
 
   const SubmitAction = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
@@ -18,23 +20,16 @@ const JoinLobby = () => {
     socket.addEventListener("open", (event) => {
       const msg = {
         type: "join",
-        data: name
+        name: name
       }
       socket.send(JSON.stringify(msg));
     })
     connection.current = socket;
+    setConnected(true)
     }
 
-    /* const test = () => {
-      const msg = {
-        type: "join",
-        name: name
-      }
-      connection.current.send(JSON.stringify(msg)); */
-    
-
   return (
-    <>
+    <>{!connected &&
       <div>
         <form onSubmit={SubmitAction}>
           <h2>ROOM CODE</h2>
@@ -46,6 +41,10 @@ const JoinLobby = () => {
           </div>
         </form>
       </div>
+      }
+      {connected &&
+        <PlayerView connection={connection.current} name={name} />
+      }
     </>
   )
 }

@@ -1,13 +1,20 @@
 import { useState } from "react"
 
-const PlayerView = (connection: WebSocket) => {
+interface PlayerViewProps {
+  connection: WebSocket,
+  name: string
+}
+
+const PlayerView: React.FC<PlayerViewProps> = ({ connection, name }) => {
     const [answerSubmitted, setAnswerSubmitted] = useState(false)
     const [answer, setAnswer] = useState("")
 
-    const handleSubmit = () => {
+    const handleSubmit = (event) => {
+        event.preventDefault();
         const msg = {
-            type: "answer",
-            data: answer
+            type: "submitAnswer",
+            answer: answer,
+            name: name
         }
         connection.send(JSON.stringify(msg));
         setAnswer("");
