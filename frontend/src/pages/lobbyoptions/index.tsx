@@ -139,9 +139,10 @@ const LobbyOptions = () => {
     }
 
     const getNextTrack = () => {
-        const nextTrack = tracks[tracks.length - 1]
-        setTracks(tracks.pop())
-        return nextTrack
+        const newTracks = [...tracks];
+        const nextTrack = newTracks.pop();
+        setTracks(newTracks);
+        return nextTrack;
     }
 
     const handleNumberOfSongschange = (event) => {

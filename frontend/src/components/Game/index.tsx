@@ -9,18 +9,44 @@ interface gameProps {
 
 const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, players, playlistUri }) => {
     const [track, setTrack] = useState<JSON>();
-    const [trackPlaying, setTrackPlaying] = useState(false)
+    const [nextTrackFlag, setNextTrackFlag] = useState(false);
+    const [startPlaybackFlag, setStartPlaybackFlag] = useState(false)
+    const [trackPlaying, setTrackPlaying] = useState(false);
+    const [showAnswers, setShowAnswers] = useState(false);
     
     useEffect(() => {
-        setTrack(getNextTrack())
-    }, [])
+        if (!track || nextTrackFlag) {
+            console.log("in useEffect 1")
+            setTrack(getNextTrack())
+            setNextTrackFlag(false)
+            setStartPlaybackFlag(true)
+        }
+    }, [nextTrackFlag, track])
 
     useEffect(() => {
-        if (track) {
-            console.log(track.track.uri)
+        if (track && !trackPlaying && startPlaybackFlag) {
+            console.log("in useEffect 2, start playback: ", track.track.name)
             startTrackPlayback()
+            setTrackPlaying(true)
+            setStartPlaybackFlag(false)
+            
+            setTimeout(() => {
+                pausePlayback();
+                setTrackPlaying(false);
+                setShowAnswers(true);
+            }, 10000)
         }
-    }, [track])
+    }, [track, trackPlaying, startPlaybackFlag])
+
+    useEffect(() => {
+        if (showAnswers) {
+            console.log("in useEffect 3, show answers")
+            setTimeout(() => {
+                setShowAnswers(false);
+                setNextTrackFlag(true);
+            }, 5000)
+        }
+    })
 
     const startTrackPlayback = async () => {
         console.log(track)
@@ -41,14 +67,17 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
             })
         })
         // possibly add some error handling 
-        setTrackPlaying(true)
     }
 
-    /* const testing = () => {
-        const nextTrack = getNextTrack()
-        setTrack(nextTrack)
-        startTrackPlayback()
-    } */
+    const pausePlayback = async () => {
+        console.log(track)
+        const response = await fetch("https://api.spotify.com/v1/me/player/pause", {
+            method: "PUT",
+            headers: {
+                "Authorization": "Bearer " + accessToken
+            },
+        })
+    }
 
     return (
         <>
@@ -63,7 +92,7 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
                         </li>
                     ))}
                 </ul>   
-                {/* <button onClick={testing}>TEST</button> */}
+                {showAnswers && <h1>SHOW ANSWERS HERE</h1>}
             </div>
         </>
     )
