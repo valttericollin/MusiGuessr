@@ -26,11 +26,26 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
     useEffect(() => {
         if (track && !trackPlaying && startPlaybackFlag) {
             console.log("in useEffect 2, start playback: ", track.track.name)
+
+            const msg = {
+                type: "gameState",
+                action: "openAnwerInput"
+            }
+            // Notify player clients to open answer inputs.
+            connection.send(JSON.stringify(msg))
+
             startTrackPlayback()
             setTrackPlaying(true)
             setStartPlaybackFlag(false)
             
             setTimeout(() => {
+                const msg = {
+                    type: "gameState",
+                    action: "closeAnswerInput"
+                };
+                // Notify player clients to close answer inputs.
+                connection.send(JSON.stringify(msg));
+
                 pausePlayback();
                 setTrackPlaying(false);
                 setShowAnswers(true);
@@ -61,9 +76,6 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
                 "uris": [
                     track.track.uri
                 ]
-                /* "offset": {
-                    "uri": track.track.uri
-                } */
             })
         })
         // possibly add some error handling 
