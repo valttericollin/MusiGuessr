@@ -30,7 +30,7 @@ func (Player *Player) disconnect() {
 
 func (Player *Player) readPump() {
 	defer func() {
-		Player.disconnect()
+		Player.disconnect() // cleanup routine
 	}()
 
 	Player.conn.SetReadLimit(maxMessageSize)
@@ -48,13 +48,13 @@ func (Player *Player) readPump() {
 		}
 
 		fmt.Println(jsonMessage)
-		Player.gameServer.broadcast <- jsonMessage
+		Player.gameServer.hostChannel <- jsonMessage
 	}
 }
 
 func (Player *Player) writePump() {
 	ticker := time.NewTicker(pingPeriod)
-	defer func() {
+	defer func() { // cleanup routine
 		ticker.Stop()
 		Player.conn.Close()
 	}()

@@ -3,25 +3,27 @@ package game
 import "fmt"
 
 type GameServer struct {
-	AccessToken      string
-	Players          map[*Player]bool
-	host             *Host
-	registerPlayer   chan *Player
-	unregisterPlayer chan *Player
-	registerHost     chan *Host
-	unregisterHost   chan *Host
-	broadcast        chan []byte
+	AccessToken            string
+	Players                map[*Player]bool
+	host                   *Host
+	registerPlayer         chan *Player
+	unregisterPlayer       chan *Player
+	registerHost           chan *Host
+	unregisterHost         chan *Host
+	hostChannel            chan []byte
+	playerBroadcastChannel chan []byte
 }
 
 func NewGameServer(accessToken string) *GameServer {
 	return &GameServer{
-		AccessToken:      accessToken,
-		Players:          make(map[*Player]bool),
-		registerPlayer:   make(chan *Player),
-		unregisterPlayer: make(chan *Player),
-		registerHost:     make(chan *Host),
-		unregisterHost:   make(chan *Host),
-		broadcast:        make(chan []byte),
+		AccessToken:            accessToken,
+		Players:                make(map[*Player]bool),
+		registerPlayer:         make(chan *Player),
+		unregisterPlayer:       make(chan *Player),
+		registerHost:           make(chan *Host),
+		unregisterHost:         make(chan *Host),
+		hostChannel:            make(chan []byte),
+		playerBroadcastChannel: make(chan []byte),
 	}
 }
 
@@ -44,8 +46,12 @@ func (server *GameServer) Run() {
 		case Player := <-server.unregisterPlayer:
 			server.removePlayer(Player)
 
-		case message := <-server.broadcast:
+		case message := <-server.playerBroadcastChannel:
 			server.broadcastToPlayers(message)
+
+		case message := <-server.hostChannel:
+			server.messageHost(message)
+
 		}
 
 	}
@@ -67,6 +73,10 @@ func (server *GameServer) removePlayer(Player *Player) {
 	if _, ok := server.Players[Player]; ok {
 		delete(server.Players, Player)
 	}
+}
+
+func (server *GameServer) messageHost(message []byte) {
+	server.host.send <- message
 }
 
 func (server *GameServer) broadcastToPlayers(message []byte) {

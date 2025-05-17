@@ -28,7 +28,7 @@ func (Host *Host) disconnect() {
 }
 
 func (Host *Host) readPump() {
-	defer func() {
+	defer func() { // cleanup routine
 		Host.disconnect()
 	}()
 
@@ -46,13 +46,13 @@ func (Host *Host) readPump() {
 			break
 		}
 
-		Host.gameServer.broadcast <- jsonMessage
+		Host.gameServer.playerBroadcastChannel <- jsonMessage
 	}
 }
 
 func (Host *Host) writePump() {
 	ticker := time.NewTicker(pingPeriod)
-	defer func() {
+	defer func() { // cleanup routine
 		ticker.Stop()
 		Host.conn.Close()
 	}()
@@ -61,7 +61,7 @@ func (Host *Host) writePump() {
 		case message, ok := <-Host.send:
 			Host.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				// The WsServer closed the channel.
+				// The gameServer closed the channel.
 				Host.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
@@ -72,7 +72,7 @@ func (Host *Host) writePump() {
 			}
 			w.Write(message)
 
-			// Attach queued chat messages to the current websocket message.
+			// Attach queued messages to the current websocket message.
 			n := len(Host.send)
 			for i := 0; i < n; i++ {
 				w.Write(newline)
@@ -106,5 +106,6 @@ func ServeHostWebsocket(gameServer *GameServer, w http.ResponseWriter, r *http.R
 
 	fmt.Print(*Host)
 
+	// Send self to server host register channel
 	gameServer.registerHost <- Host
 }

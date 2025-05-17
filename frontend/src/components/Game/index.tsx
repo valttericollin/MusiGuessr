@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react"
+import PlayerCard from "../PlayerCard"
+import helper from "../../misc/helper"
 
 interface gameProps {
   getNextTrack: () => JSON,
   connection: WebSocket,
   accessToken: string,
-  playlistUri: string
+  playlistUri: string,
+  resetCurrentRoundAnswers: () => void
 }
 
-const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, players, playlistUri }) => {
+const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, players, playlistUri, resetCurrentRoundAnswers, setPlayers }) => {
     const [track, setTrack] = useState<JSON>();
     const [nextTrackFlag, setNextTrackFlag] = useState(false);
     const [startPlaybackFlag, setStartPlaybackFlag] = useState(false)
@@ -29,9 +32,9 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
 
             const msg = {
                 type: "gameState",
-                action: "openAnwerInput"
+                action: "openAnswerInput"
             }
-            // Notify player clients to open answer inputs.
+            // Signal player clients to open answer inputs.
             connection.send(JSON.stringify(msg))
 
             startTrackPlayback()
@@ -43,7 +46,7 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
                     type: "gameState",
                     action: "closeAnswerInput"
                 };
-                // Notify player clients to close answer inputs.
+                // Signal player clients to close answer inputs.
                 connection.send(JSON.stringify(msg));
 
                 pausePlayback();
@@ -56,12 +59,54 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
     useEffect(() => {
         if (showAnswers) {
             console.log("in useEffect 3, show answers")
+            updateScores();
             setTimeout(() => {
                 setShowAnswers(false);
                 setNextTrackFlag(true);
+                resetCurrentRoundAnswers();
             }, 5000)
         }
     })
+
+    const updateScores = () => {
+        // Todo: fix
+        let score = 10;
+        const orderedTimeStamps: { timeStamp: number; name: string }[] = [];
+
+        players.forEach((player) => {
+            if (helper.compare(track.track.name, player.currentRoundAnswer.answer, 0.1)) {
+            orderedTimeStamps.push({
+                timeStamp: player.currentRoundAnswer.timeStamp,
+                name: player.name,
+            });
+            }
+        });
+
+        if (orderedTimeStamps.length === 0) return;
+
+        // sort from fastest to slowest
+        orderedTimeStamps.sort((a, b) => a.timeStamp - b.timeStamp);
+
+        // map of name -> score
+        const scoreMap: Record<string, number> = {};
+        orderedTimeStamps.forEach((entry) => {
+            scoreMap[entry.name] = score;
+            if (score > 6) score -= 2;
+        });
+
+        // apply score updates
+        setPlayers((prevPlayers) =>
+            prevPlayers.map((player) => {
+            if (scoreMap[player.name] !== undefined) {
+                return {
+                ...player,
+                score: player.score + scoreMap[player.name],
+                };
+            }
+            return player;
+            })
+        );
+    };
 
     const startTrackPlayback = async () => {
         console.log(track)
@@ -96,15 +141,14 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
             <div>
                 <ul>
                     {players.map((player) => (
-                        <li
-                        key={player.name}
-                        style={{ color: player.currentRoundAnswer !== "" ? "green" : "gray" }}
-                        >
-                        {player.name} score: {player.score}
-                        </li>
+                        <PlayerCard 
+                            name={player.name}
+                            score={player.score}
+                            currentRoundAnswer={player.currentRoundAnswer.answer}
+                            showAnswers={showAnswers}
+                        />
                     ))}
                 </ul>   
-                {showAnswers && <h1>SHOW ANSWERS HERE</h1>}
             </div>
         </>
     )

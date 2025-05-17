@@ -6,7 +6,10 @@ import helper from "../../misc/helper";
 interface Player {
     name: string,
     score: number,
-    currentRoundAnswer: string
+    currentRoundAnswer: {
+        answer: string,
+        timeStamp: number
+    }
 }
 
 const LobbyOptions = () => {
@@ -17,12 +20,6 @@ const LobbyOptions = () => {
     const [numberOfTracks, setNumberOfTracks] = useState("");
     const [gameStarted, setGameStarted] = useState(false)
     const connection = useRef<WebSocket>(null);
-
-    /* const getCookie = (name: string) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-    } */
     
     useEffect(() => {
         console.log("in useEffect")
@@ -66,7 +63,7 @@ const LobbyOptions = () => {
         switch (parsed.type) {
             case "join": {
                 console.log("join")
-                const newPlayer = {name: parsed.name, score: 0, currentRoundAnswer: ""}
+                const newPlayer = {name: parsed.name, score: 0, currentRoundAnswer: {answer: "", timeStamp: 0}}
                 setPlayers([...players, newPlayer])
                 break
             }
@@ -77,7 +74,7 @@ const LobbyOptions = () => {
                 setPlayers(prevPlayers => 
                     prevPlayers.map((player) =>
                         player.name === parsed.name
-                            ? { ...player, currentRoundAnswer: parsed.answer }
+                            ? { ...player, currentRoundAnswer: {answer: parsed.answer, timeStamp: parsed.timeStamp} }
                             : player
                     ));
                 break
@@ -88,7 +85,7 @@ const LobbyOptions = () => {
     }
 
     const resetCurrentRoundAnswers = () => {
-        setPlayers(players.map((player) => ({...player, currentRoundAnswer: ""})))
+        setPlayers(players.map((player) => ({...player, currentRoundAnswer: {answer: "", timeStamp: 0}})))
     }
 
     const handlePlaylistSelect = (playlist) => {
@@ -194,6 +191,8 @@ const LobbyOptions = () => {
                     accessToken={helper.getCookie("token")} 
                     players={players} 
                     playlistUri={selectedPlaylist.uri}
+                    resetCurrentRoundAnswers={resetCurrentRoundAnswers}
+                    setPlayers={setPlayers}
                 />
             }
         </>
