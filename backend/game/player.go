@@ -74,7 +74,7 @@ func (Player *Player) writePump() {
 			}
 			w.Write(message)
 
-			// Attach queued chat messages to the current websocket message.
+			// Attach queued messages to the current websocket message.
 			n := len(Player.send)
 			for i := 0; i < n; i++ {
 				w.Write(newline)
@@ -101,7 +101,7 @@ func ServePlayerWebsocket(gameServer *GameServer, w http.ResponseWriter, r *http
 	}
 
 	Player := newPlayer(conn, gameServer)
-	fmt.Print("New Player connected\n")
+	fmt.Println("New Player connected")
 
 	go Player.writePump()
 	go Player.readPump()

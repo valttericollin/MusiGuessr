@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import PlayerCard from "../PlayerCard"
+import PlayerContainer from "../PlayerContainer"
 import helper from "../../misc/helper"
 
 interface gameProps {
@@ -13,8 +14,9 @@ interface gameProps {
 const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, players, playlistUri, setPlayers }) => {
     const [track, setTrack] = useState<JSON>();
     const [nextTrackFlag, setNextTrackFlag] = useState(false);
-    const [startPlaybackFlag, setStartPlaybackFlag] = useState(false)
+    const [startPlaybackFlag, setStartPlaybackFlag] = useState(false);
     const [trackPlaying, setTrackPlaying] = useState(false);
+    const [finalScoreView, setFinalScoreView] = useState(false);
     const [showAnswers, setShowAnswers] = useState(false);
     const playersRef = useRef(players);
 
@@ -24,10 +26,14 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
     
     useEffect(() => {
         if (!track || nextTrackFlag) {
-            console.log("in useEffect 1")
-            setTrack(getNextTrack())
-            setNextTrackFlag(false)
-            setStartPlaybackFlag(true)
+            const nextTrack = getNextTrack();
+            setNextTrackFlag(false);
+            if (nextTrack === undefined || nextTrack === null) {
+                setFinalScoreView(true);
+                return;
+            }
+            setTrack(nextTrack);
+            setStartPlaybackFlag(true);
         }
     }, [getNextTrack, nextTrackFlag, track])
 
@@ -112,7 +118,7 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
             })
         );
         setTimeout(() => {
-            console.log("Players after score update:", players);
+            console.log("Players after score update:", players); // not on time
         }, 0);
     };
 
@@ -155,14 +161,23 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
     return (
         <>
             <div>
-                    {players.map((player) => (
-                        <PlayerCard 
-                            name={player.name}
-                            score={player.score}
-                            currentRoundAnswer={player.currentRoundAnswer.answer}
-                            showAnswers={showAnswers}
-                        />
-                    ))}  
+                {/* {players.map((player) => (
+                    <PlayerCard
+                        key={player.name}
+                        name={player.name}
+                        score={player.score}
+                        currentRoundAnswer={player.currentRoundAnswer.answer}
+                        showAnswers={showAnswers}
+                    />
+                ))}  */} 
+                {<PlayerContainer 
+                    players={players}
+                    showAnswers={showAnswers}
+                />}
+            </div>
+            <div>
+                {finalScoreView &&
+                <PlayerContainer players={players} />}
             </div>
         </>
     )

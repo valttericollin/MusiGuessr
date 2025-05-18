@@ -1,24 +1,15 @@
 .topbar {
-    position: relative;
-    z-index: 2;
-    max-width: 100%;
-    height: 70px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: white;
-    padding: 100px 2rem;
-    border: 1rem solid;
-    border-color: aliceblue;
+  display: flex;
+  justify-content: center;
+  align-items: center;     
+  height: 100px;
+  padding: 0 2rem;         
+  background-color: rgb(41, 0, 136);
 }
 
 
-/* .container {
-    position: relative;
-} */
-
 .h1 {
-    color: rgb(255, 0, 0);
+    color: inherit;
 }
   
 /* .topbar .logo {

@@ -29,8 +29,7 @@ func NewGameServer(accessToken string) *GameServer {
 
 func (server *GameServer) Run() {
 	for {
-		fmt.Println(len(server.Players)) //debug
-		fmt.Println(server.host)
+
 		select {
 
 		case Host := <-server.registerHost:
@@ -80,7 +79,6 @@ func (server *GameServer) messageHost(message []byte) {
 }
 
 func (server *GameServer) broadcastToPlayers(message []byte) {
-	fmt.Println("Messaging players")
 	for Player := range server.Players {
 		Player.send <- message
 	}

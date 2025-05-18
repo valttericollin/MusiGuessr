@@ -59,7 +59,7 @@ const PlayerView: React.FC<PlayerViewProps> = ({ connection, name }) => {
             }
             {submitFormOpen &&
                 <form onSubmit={handleSubmit}>
-                    <input placeholder="ENTER YOUR GUESS" value={answer} onChange={(event) => setAnswer(event.target.value)} maxLength={24}/>
+                    <input placeholder="ENTER YOUR GUESS" value={answer} onChange={(event) => setAnswer(event.target.value)} maxLength={32}/>
                     <div>
                         <button type="submit">SEND</button>
                     </div>

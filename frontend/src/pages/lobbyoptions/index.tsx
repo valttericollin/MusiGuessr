@@ -111,7 +111,8 @@ const LobbyOptions = () => {
             data = await response.json()
             playlistTracks.push(data)
         }
-        setTracks(playlistTracks)
+        helper.shuffle(playlistTracks);
+        setTracks(playlistTracks.slice(0, numberOfTracks))
         //TODO: transfer playback to some device to start playback.
         // notify server
         const msg = {

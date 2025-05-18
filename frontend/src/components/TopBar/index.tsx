@@ -3,11 +3,9 @@ import styles from './TopBar.module.css'
 const TopBar = () => {
 
     return (
-        <div className={styles.TopBar}>
-            <div>
-                <h1>TOP BAR OVER HERE</h1>
+            <div className={styles.topbar}>
+                <h1 className={styles.h1}>MusiGuessr</h1>
             </div>
-        </div>
     )
 }
 

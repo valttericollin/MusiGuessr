@@ -56,7 +56,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	params.Add("client_id", client_id)
 	params.Add("scope", scope)
 	params.Add("redirect_uri", "http://localhost:8080/spotifyCallback")
-	params.Add("state", "replacethiswithsomethingsmarterlatereiksjea")
+	params.Add("state", "replacethiswithsomethingsmarterlater")
 
 	authURL := "https://accounts.spotify.com/authorize?" + params.Encode()
 	http.Redirect(w, r, authURL, http.StatusSeeOther)
@@ -123,17 +123,6 @@ func spotifyCallback(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 	})
 
-	// Probably not needed, just send the 4 letter route
-	/* var sessionID = uuid.New().String()
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     "SID",
-		Value:    sessionID,
-		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
-		Path:     "/",
-	}) */
-
 	var sessionID = genRandomString(4)
 
 	http.SetCookie(w, &http.Cookie{
@@ -197,22 +186,8 @@ func main() {
 	router.HandleFunc("/game/{id}/{token}", func(w http.ResponseWriter, r *http.Request) {
 
 		vars := mux.Vars(r)
-
-		// debugging prints ---->
-		fmt.Print("\nMux.vars: ")
-		//fmt.Println(vars)
-		bs, _ := json.Marshal(vars)
-		fmt.Println(string(bs))
-
 		sid := vars["id"]
 		var gameServer, ok = gameServers[sid]
-
-		fmt.Print("sid: ")
-		fmt.Println(sid)
-
-		fmt.Print("Gameservers: ")
-		fmt.Println(gameServers)
-		// <------
 
 		if !ok {
 			fmt.Print("Game server not found. Returning")
@@ -227,7 +202,6 @@ func main() {
 			return
 		}
 		game.ServeHostWebsocket(&gameServer, w, r)
-
 	})
 
 	fmt.Printf("Server listening on port %s\n", port)

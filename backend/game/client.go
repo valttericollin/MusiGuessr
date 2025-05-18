@@ -8,16 +8,16 @@ import (
 )
 
 const (
-	// Max wait time when writing message to peer
+	// Max wait time when writing message
 	writeWait = 10 * time.Second
 
-	// Max time till next pong from peer
+	// Max time till next pong from client
 	pongWait = 60 * time.Second
 
-	// Send ping interval, must be less then pong wait time
+	// Send ping interval
 	pingPeriod = (pongWait * 9) / 10
 
-	// Maximum message size allowed from peer.
+	// Maximum message size allowed from client
 	maxMessageSize = 10000
 )
 

@@ -38,7 +38,6 @@ const [displayScore, setDisplayScore] = useState(score);
         <>
             {!showAnswers && 
                 <div
-                key={name}
                 style={{ color: currentRoundAnswer !== "" ? "white" : "gray" }}
                 >
                     {name} Score: {displayScore}
@@ -46,7 +45,6 @@ const [displayScore, setDisplayScore] = useState(score);
             }
             {showAnswers &&
                 <div
-                key={name}
                 style={{ color: currentRoundAnswer !== "" ? "white" : "gray" }}
                 >
                     {name} Score: {displayScore} Answer: {currentRoundAnswer != "" ? currentRoundAnswer : "..."}
