@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import PlayerCard from "../PlayerCard";
 import PlayerContainer from "../PlayerContainer";
 import helper from "../../misc/helper";
 
@@ -86,7 +85,7 @@ const Game: React.FC<gameProps> = ({
     }
   }, [showAnswers]);
 
-  const updateScores = (playersSnapshot) => {
+  const updateScores = () => {
     // Todo: fix
     let score = 10;
     const orderedTimeStamps: { timeStamp: number; name: string }[] = [];
@@ -170,18 +169,9 @@ const Game: React.FC<gameProps> = ({
   return (
     <>
       <div>
-        {/* {players.map((player) => (
-                    <PlayerCard
-                        key={player.name}
-                        name={player.name}
-                        score={player.score}
-                        currentRoundAnswer={player.currentRoundAnswer.answer}
-                        showAnswers={showAnswers}
-                    />
-                ))}  */}
         {<PlayerContainer players={players} showAnswers={showAnswers} />}
       </div>
-      <div>{finalScoreView && <PlayerContainer players={players} />}</div>
+      <div>{finalScoreView && <PlayerContainer players={players} showAnswers={showAnswers}/>}</div>
     </>
   );
 };
