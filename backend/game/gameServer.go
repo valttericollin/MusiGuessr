@@ -84,7 +84,4 @@ func (server *GameServer) broadcastToPlayers(message []byte) {
 	for Player := range server.Players {
 		Player.send <- message
 	}
-	// test
-	fmt.Println("Messaging host")
-	server.host.send <- message
 }

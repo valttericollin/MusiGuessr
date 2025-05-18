@@ -11,45 +11,46 @@ const PlayerCard: React.FC<PlayerCardProps> = ({name, score, currentRoundAnswer,
 const [displayScore, setDisplayScore] = useState(score);
 
     useEffect(() => {
-        console.log("PlayerCard answer: ", currentRoundAnswer)
-        // Smooth score update
-        if (showAnswers && displayScore != score) {
-        // SOMETHING BROKEN
-            const difference = score - displayScore;
-            const intervalTime = 1000 / difference;
+        if (displayScore === score) return;
 
-            /* const increment = difference > 0 ? 1 : 0; */
+        const difference = score - displayScore;
+        const steps = Math.abs(difference);
+        const duration = 1000; // 1 second
+        const intervalTime = duration / steps;
 
-            const interval = setInterval(() => {
-                setDisplayScore(prev => {
-                    const next = prev + 1;
-                    if (next >= score) {
-                        clearInterval(interval);
-                        return score;
-                    }
-                    return next;
-                })
-            }, intervalTime);
-        }
-    },)
+        const increment = difference > 0 ? 1 : -1;
+
+        const interval = setInterval(() => {
+        setDisplayScore(prev => {
+            const next = prev + increment;
+            if ((increment > 0 && next >= score) || (increment < 0 && next <= score)) {
+            clearInterval(interval);
+            return score;
+            }
+            return next;
+        });
+        }, intervalTime);
+
+        return () => clearInterval(interval);
+    }, [score, displayScore]);
 
     return (
         <>
             {!showAnswers && 
-                <li
+                <div
                 key={name}
                 style={{ color: currentRoundAnswer !== "" ? "white" : "gray" }}
                 >
-                    {name} Score: {score}
-                </li>
+                    {name} Score: {displayScore}
+                </div>
             }
             {showAnswers &&
-                <li
+                <div
                 key={name}
                 style={{ color: currentRoundAnswer !== "" ? "white" : "gray" }}
                 >
-                    {name} Score: {score} Answer: {currentRoundAnswer != "" ? currentRoundAnswer : "..."}
-                </li>
+                    {name} Score: {displayScore} Answer: {currentRoundAnswer != "" ? currentRoundAnswer : "..."}
+                </div>
             }
         </>
     )

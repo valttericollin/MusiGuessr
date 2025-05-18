@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import PlayerCard from "../PlayerCard"
 import helper from "../../misc/helper"
 
@@ -10,12 +10,17 @@ interface gameProps {
   resetCurrentRoundAnswers: () => void
 }
 
-const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, players, playlistUri, resetCurrentRoundAnswers, setPlayers }) => {
+const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, players, playlistUri, setPlayers }) => {
     const [track, setTrack] = useState<JSON>();
     const [nextTrackFlag, setNextTrackFlag] = useState(false);
     const [startPlaybackFlag, setStartPlaybackFlag] = useState(false)
     const [trackPlaying, setTrackPlaying] = useState(false);
     const [showAnswers, setShowAnswers] = useState(false);
+    const playersRef = useRef(players);
+
+    useEffect(() => {
+        playersRef.current = players;
+    }, [players]);
     
     useEffect(() => {
         if (!track || nextTrackFlag) {
@@ -24,7 +29,7 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
             setNextTrackFlag(false)
             setStartPlaybackFlag(true)
         }
-    }, [nextTrackFlag, track])
+    }, [getNextTrack, nextTrackFlag, track])
 
     useEffect(() => {
         if (track && !trackPlaying && startPlaybackFlag) {
@@ -66,14 +71,14 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
                 resetCurrentRoundAnswers();
             }, 5000)
         }
-    })
+    },[showAnswers])
 
-    const updateScores = () => {
+    const updateScores = (playersSnapshot) => {
         // Todo: fix
         let score = 10;
         const orderedTimeStamps: { timeStamp: number; name: string }[] = [];
 
-        players.forEach((player) => {
+        playersRef.current.forEach((player) => {
             if (helper.compare(track.track.name, player.currentRoundAnswer.answer, 0.1)) {
             orderedTimeStamps.push({
                 timeStamp: player.currentRoundAnswer.timeStamp,
@@ -106,6 +111,9 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
             return player;
             })
         );
+        setTimeout(() => {
+            console.log("Players after score update:", players);
+        }, 0);
     };
 
     const startTrackPlayback = async () => {
@@ -126,6 +134,14 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
         // possibly add some error handling 
     }
 
+    const resetCurrentRoundAnswers = () => {
+        setPlayers(playersRef.current.map((player) => {
+            // fix linter errors
+            console.log("in reset answer, player: ", player);
+            return {...player, currentRoundAnswer: {answer: "", timeStamp: 0}}
+        }))
+    }
+
     const pausePlayback = async () => {
         console.log(track)
         const response = await fetch("https://api.spotify.com/v1/me/player/pause", {
@@ -139,7 +155,6 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
     return (
         <>
             <div>
-                <ul>
                     {players.map((player) => (
                         <PlayerCard 
                             name={player.name}
@@ -147,8 +162,7 @@ const Game: React.FC<gameProps> = ({ getNextTrack, connection, accessToken, play
                             currentRoundAnswer={player.currentRoundAnswer.answer}
                             showAnswers={showAnswers}
                         />
-                    ))}
-                </ul>   
+                    ))}  
             </div>
         </>
     )

@@ -64,12 +64,12 @@ const LobbyOptions = () => {
             case "join": {
                 console.log("join")
                 const newPlayer = {name: parsed.name, score: 0, currentRoundAnswer: {answer: "", timeStamp: 0}}
-                setPlayers([...players, newPlayer])
+                setPlayers(prevPlayers => [...prevPlayers, newPlayer])
                 break
             }
             case "submitAnswer":
                 console.log("submitAnswer")
-                console.log("cur players: ", players)
+                console.log("cur players: ", players) // empty array for some reason? works either way, fix later.
                 console.log(players.find((player) => player.name === parsed.name))
                 setPlayers(prevPlayers => 
                     prevPlayers.map((player) =>
@@ -82,11 +82,14 @@ const LobbyOptions = () => {
                 console.log("unrecognized message type")
                 // do stuff
         }
+        setTimeout(() => {
+            console.log("players after handlemessage: ",players) // still empty array.
+        },0)
     }
 
-    const resetCurrentRoundAnswers = () => {
+    /* const resetCurrentRoundAnswers = () => {
         setPlayers(players.map((player) => ({...player, currentRoundAnswer: {answer: "", timeStamp: 0}})))
-    }
+    } */
 
     const handlePlaylistSelect = (playlist) => {
         console.log(playlist.name)
@@ -191,7 +194,6 @@ const LobbyOptions = () => {
                     accessToken={helper.getCookie("token")} 
                     players={players} 
                     playlistUri={selectedPlaylist.uri}
-                    resetCurrentRoundAnswers={resetCurrentRoundAnswers}
                     setPlayers={setPlayers}
                 />
             }
