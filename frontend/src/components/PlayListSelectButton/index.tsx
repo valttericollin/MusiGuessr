@@ -1,15 +1,13 @@
-const PlayListSelectButton = ({playlist, handlePlaylistSelect}) => {
+const PlayListSelectButton = ({ playlist, handlePlaylistSelect }) => {
+  const onSelect = () => {
+    handlePlaylistSelect(playlist);
+  };
 
-    const onSelect = () => {
-        handlePlaylistSelect(playlist);
-    }
+  return (
+    <div>
+      <button onClick={onSelect}>{playlist.name}</button>
+    </div>
+  );
+};
 
-    return (
-        <div>
-            <button onClick={onSelect}>{playlist.name}</button>
-        </div>
-    )
-
-}
-
-export default PlayListSelectButton
+export default PlayListSelectButton;

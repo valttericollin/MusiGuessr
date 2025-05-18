@@ -1,17 +1,16 @@
 .topbar {
   display: flex;
   justify-content: center;
-  align-items: center;     
+  align-items: center;
   height: 100px;
-  padding: 0 2rem;         
+  padding: 0 2rem;
   background-color: rgb(41, 0, 136);
 }
 
-
 .h1 {
-    color: inherit;
+  color: inherit;
 }
-  
+
 /* .topbar .logo {
     font-size: 1.5rem;
     font-weight: bold;
@@ -33,4 +32,3 @@
 .topbar .nav-links a:hover {
     color: #00bcd4;
 } */
-  

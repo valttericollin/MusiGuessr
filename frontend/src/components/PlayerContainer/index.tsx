@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import PlayerCard from "../PlayerCard";
-import styles from "./PlayerContainer.module.css"
+import styles from "./PlayerContainer.module.css";
 
 interface Player {
   name: string;
@@ -16,10 +16,13 @@ interface PlayerContainerProps {
   showAnswers: boolean;
 }
 
-const PlayerContainer: React.FC<PlayerContainerProps> = ({ players, showAnswers }) => {
+const PlayerContainer: React.FC<PlayerContainerProps> = ({
+  players,
+  showAnswers,
+}) => {
   const sortedPlayers = useMemo(
     () => [...players].sort((a, b) => b.score - a.score),
-    [players]
+    [players],
   );
 
   return (
