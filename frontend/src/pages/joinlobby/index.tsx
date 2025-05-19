@@ -11,8 +11,9 @@ const JoinLobby = () => {
 
   const SubmitAction = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
+    const baseAddress = import.meta.env.VITE_BASE_ADDRESS;
     const response = await fetch(
-      `http:://localhost:8080/game/${roomCode}/preflight`,
+      `${baseAddress}/game/${roomCode}/preflight`,
     );
     if (!response.ok) {
       console.log("Invalid gameId");
@@ -20,7 +21,8 @@ const JoinLobby = () => {
       return;
     }
 
-    const socket = new WebSocket(`ws://localhost:8080/game/${roomCode}`);
+    const ws = import.meta.env.VITE_BASE_WS;
+    const socket = new WebSocket(`${ws}/game/${roomCode}`);
     socket.addEventListener("open", (event) => {
       const msg = {
         type: "join",

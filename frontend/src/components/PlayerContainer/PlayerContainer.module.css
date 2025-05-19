@@ -2,9 +2,13 @@
   list-style: none;
   padding: 0;
   margin: 0;
+
+  display: flex;
+  flex-wrap: wrap; /* allow wrapping if too many cards */
+  gap: 16px; /* spacing between cards */
+  justify-content: center; /* center the row */
 }
 
 .playerListItem {
-  transition: all 0.5s ease;
-  margin-bottom: 10px;
+  margin: 0;
 }

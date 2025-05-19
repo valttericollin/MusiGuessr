@@ -36,44 +36,11 @@
 }
 
 .button:hover {
-  background-color: #949494; /* Optional: hover effect */
+  background-color: #949494;
 }
 
-
-/* .button {
-  width: 200px; 
-  height: 60px;
-  font-size: 16px;
-  font-family: inherit;
-  font-weight: 500;
-} */
-
-/* .container {
-  max-width: 600px;
-  max-height: 100%;
-  padding-bottom: 10%;
-  padding-top: 10%;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.logo {
+  height: 24px; 
+  width: 24px;
+  margin-right: 10px; 
 }
-
-.buttonContainer {
-  height: 60px;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.button {
-  width: 100%;
-  height: 60px;
-  padding: 10px;
-  font-size: 16px;
-  font-family: inherit;
-  font-weight: 500;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-} */

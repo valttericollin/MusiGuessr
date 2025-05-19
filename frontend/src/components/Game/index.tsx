@@ -2,12 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import PlayerContainer from "../PlayerContainer";
 import SpinningRecord from "../SpinningRecord";
 import helper from "../../misc/helper";
+import styles from "./Game.module.css"
 
 interface gameProps {
   getNextTrack: () => JSON;
   connection: WebSocket;
   accessToken: string;
   playlistUri: string;
+  players: any;
+  setPlayers: any;
+  setGameStarted: any;
   resetCurrentRoundAnswers: () => void;
 }
 
@@ -18,7 +22,12 @@ const Game: React.FC<gameProps> = ({
   players,
   playlistUri,
   setPlayers,
+  setGameStarted
 }) => {
+  const [startMessage, setStartMessage] = useState(true);
+  const [startCounter, setStartCounter] = useState(3);
+  const [revealAnswer, setRevealAnswer] = useState(false);
+  const [showBackToLobbyButton, setShowBackToLobbyButton] = useState(false)
   const [track, setTrack] = useState<JSON>();
   const [nextTrackFlag, setNextTrackFlag] = useState(false);
   const [startPlaybackFlag, setStartPlaybackFlag] = useState(false);
@@ -32,17 +41,31 @@ const Game: React.FC<gameProps> = ({
   }, [players]);
 
   useEffect(() => {
-    if (!track || nextTrackFlag) {
+    if (startCounter >= 1) {
+      const interval = setInterval(() => {
+        setStartCounter((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    } else {
+      setStartMessage(false);
+    }
+  }, [startCounter])
+
+  useEffect(() => {
+    if (!startMessage && (!track || nextTrackFlag)) {
       const nextTrack = getNextTrack();
       setNextTrackFlag(false);
       if (nextTrack === undefined || nextTrack === null) {
         setFinalScoreView(true);
+        setTimeout(() => {
+          setShowBackToLobbyButton(true);
+        }, 5000);
         return;
       }
       setTrack(nextTrack);
       setStartPlaybackFlag(true);
     }
-  }, [getNextTrack, nextTrackFlag, track]);
+  }, [getNextTrack, nextTrackFlag, track, startMessage]);
 
   useEffect(() => {
     if (track && !trackPlaying && startPlaybackFlag) {
@@ -69,10 +92,19 @@ const Game: React.FC<gameProps> = ({
 
         pausePlayback();
         setTrackPlaying(false);
-        setShowAnswers(true);
+        setRevealAnswer(true);
       }, 20000); // Stop playback after 20s
     }
   }, [track, trackPlaying, startPlaybackFlag]);
+
+  useEffect(() => {
+    if (revealAnswer) {
+      setTimeout(() => {
+        setRevealAnswer(false);
+        setShowAnswers(true);
+      },7000);
+    };
+  }, [revealAnswer])
 
   useEffect(() => {
     if (showAnswers) {
@@ -166,10 +198,41 @@ const Game: React.FC<gameProps> = ({
     });
   };
 
+  const handleBackToLobbyClick = (event) => {
+    setTrack(null);
+    setPlayers(
+      playersRef.current.map((player) => {
+        return (
+          {...player, score: 0}
+        )
+      })
+    )
+    setGameStarted(false);
+    };
+
   return (
     <>
       <div>
-        <h1></h1>
+        {startMessage &&
+          <h1 className={styles.h1}>Get ready! Game starting in {startCounter}</h1>
+        }
+        {trackPlaying && 
+          <h1 className={styles.h1}>Write your answers!</h1>
+        }
+        {revealAnswer && 
+          <h1 className={styles.h1}>Correct answer: {track.track.name}</h1>
+        }
+        {showAnswers && 
+          <h1 className={styles.h1}>You answered</h1>
+        }
+        {finalScoreView && 
+          <h1 className={styles.h1}>Final scores</h1>
+        }
+        {showBackToLobbyButton &&
+          <div className={styles.buttonContainer}>
+            <button className={styles.button} onClick={handleBackToLobbyClick}>Back to lobby</button>
+          </div>
+        }
       </div>
       <div>
         <SpinningRecord isSpinning={trackPlaying} />
@@ -177,7 +240,6 @@ const Game: React.FC<gameProps> = ({
       <div>
         {<PlayerContainer players={players} showAnswers={showAnswers} />}
       </div>
-      {/* <div>{finalScoreView && <PlayerContainer players={players} showAnswers={showAnswers}/>}</div> */}
     </>
   );
 };

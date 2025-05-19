@@ -9,7 +9,6 @@
   margin-top: 100px;
   padding: 0px;
   color: var(--black);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .container * {

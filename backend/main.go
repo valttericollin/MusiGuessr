@@ -142,6 +142,7 @@ func spotifyCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func gamePreflight(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	vars := mux.Vars(r)
 	sid := vars["id"]
 

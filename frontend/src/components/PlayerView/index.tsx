@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import styles from "./PlayerView.module.css"
 
 interface PlayerViewProps {
   connection: WebSocket;
@@ -54,21 +55,22 @@ const PlayerView: React.FC<PlayerViewProps> = ({ connection, name }) => {
   return (
     <>
       <div>
-        {waitingForGameStart && <p>Waiting for host to start the game.</p>}
+        {waitingForGameStart && <h2 className={styles.h2}>Waiting for host to start the game.</h2>}
         {submitFormOpen && (
-          <form onSubmit={handleSubmit}>
+          <form className={styles.formContainer} onSubmit={handleSubmit}>
             <input
-              placeholder="ENTER YOUR GUESS"
+              className={styles.inputContainer}
+              placeholder="ENTER YOUR ANSWER"
               value={answer}
               onChange={(event) => setAnswer(event.target.value)}
               maxLength={32}
             />
-            <div>
-              <button type="submit">SEND</button>
+            <div className={styles.buttonContainer}>
+              <button className={styles.button} type="submit">SEND</button>
             </div>
           </form>
         )}
-        {!submitFormOpen && <p>Answer submitted. Waiting for other players.</p>}
+        {!submitFormOpen && !waitingForGameStart && <h2 className={styles.h2}>Answer submitted. Waiting for next song.</h2>}
       </div>
     </>
   );

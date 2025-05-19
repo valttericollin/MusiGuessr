@@ -48,8 +48,9 @@ const LobbyOptions = () => {
       getPlaylists();
     }
     const SID = helper.getCookie("SID");
+    const wsAddress = import.meta.env.VITE_BASE_WS;
     const socket = new WebSocket(
-      `ws://localhost:8080/game/${SID}/${accessToken}`,
+      `${wsAddress}/game/${SID}/${accessToken}`,
     );
 
     socket.addEventListener("open", (event) => {
@@ -251,7 +252,7 @@ const LobbyOptions = () => {
                 <section className={styles.textSetction}>
                   The aim of the game is to guess the names of the songs being played.
                   If multiple players get the same song right, the faster answers will get more
-                  points. The player with the most points after the last song wins! Good luck!
+                  points. The player with the most points at the end of the game wins! Good luck!
                 </section>
               </div>
               <div className={styles.sidePanel}>
@@ -279,6 +280,7 @@ const LobbyOptions = () => {
             players={players}
             playlistUri={selectedPlaylist.uri}
             setPlayers={setPlayers}
+            setGameStarted={setGameStarted}
           />
         )}
       </PageContents>
