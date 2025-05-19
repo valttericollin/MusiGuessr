@@ -1,7 +1,13 @@
 import { useEffect, useState, useRef } from "react";
-import PlayListSelectButton from "../../components/PlayListSelectButton";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Mousewheel, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/mousewheel';
 import Game from "../../components/Game";
 import helper from "../../misc/helper";
+import PageContents from "../../components/PageContents";
+import styles from "./LobbyOptions.module.css"
 
 interface Player {
   name: string;
@@ -111,6 +117,10 @@ const LobbyOptions = () => {
   };
 
   const handleStartClick = async () => {
+    if (players.length == 0) {
+      // maybe display some error message.
+      return;
+    }
     // get all tracks in playlist
     const accessToken = helper.getCookie("token");
     let response = await fetch(
@@ -171,64 +181,107 @@ const LobbyOptions = () => {
       return;
     }
     input = parseInt(input);
-    if (!Number.isNaN(input) && 0 < input && input < 13) {
+    if (!Number.isNaN(input) && 0 < input && input <= 100) {
       setNumberOfTracks(input);
     }
   };
 
   return (
     <>
-      {!gameStarted && ( // probably should be made into its own component
-        <>
-          <div>
-            <h1>Lobby options over here</h1>
-          </div>
-          <div>
-            {playlists.map((playlist) => (
-              <PlayListSelectButton
-                key={playlist.name}
-                playlist={playlist}
-                handlePlaylistSelect={handlePlaylistSelect}
-              ></PlayListSelectButton>
-            ))}
-          </div>
-          <div>
-            <button onClick={handleStartClick}>Start game!</button>
-          </div>
-          <div>
-            <h3>Join with code {helper.getCookie("SID")}</h3>
-          </div>
-          <div>
-            <input
-              placeholder="NUMBER OF SONGS 1-12"
-              value={numberOfTracks}
-              onChange={handleNumberOfSongschange}
-              maxLength={2}
-            />
-          </div>
-          <div>
-            {players.length > 0 ? (
-              <ul>
-                {players.map((player) => (
-                  <li>{player.name}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>Waiting for players to join...</p>
-            )}
-          </div>
-        </>
-      )}
-      {gameStarted && (
-        <Game
-          getNextTrack={getNextTrack}
-          connection={connection.current}
-          accessToken={helper.getCookie("token")}
-          players={players}
-          playlistUri={selectedPlaylist.uri}
-          setPlayers={setPlayers}
-        />
-      )}
+      <PageContents>
+        {!gameStarted && ( // probably should be made into its own component
+          <>
+            <div>
+              <h1 className={styles.h1}>Choose a playlist</h1>
+            </div>
+            <div className={styles.carousel}>
+              <Swiper
+                className="mySwiper"
+                direction={'horizontal'}
+                slidesPerView={3}
+                spaceBetween={30}
+                mousewheel={true}
+                loop={true}
+                pagination={{
+                  clickable: true,
+                }}
+                modules={[Mousewheel]}
+                style={{ width: '100%', maxWidth: '100vw' }}
+                watchSlidesProgress={false}
+                onSlideChange={(swiper) => {
+                  let activeIndex = swiper.realIndex;
+                  activeIndex = activeIndex === playlists.length - 1 ? 0 : activeIndex + 1; // fix the index
+                  const activePlaylist = playlists[activeIndex];
+                  console.log("Current Playlist:", activePlaylist);
+                  console.log(activeIndex);
+                  setSelectedPlaylist(activePlaylist);
+                }}
+              >
+                {playlists.map((playlist) => {
+                  return (
+                  <SwiperSlide
+                    key={playlist.name}>
+                      <button
+                        className={playlist.name === selectedPlaylist?.name ? styles.playlistCardSelected : styles.playlistCard}>
+                        {playlist.name}
+                      </button>
+                  </SwiperSlide>
+                  )
+                })}
+              </Swiper>
+            <div>
+              <input
+                type="number"
+                min={""}
+                max={selectedPlaylist?.tracks.total}
+                className={styles.inputContainer}
+                placeholder={`SELECT NUMBER OF SONGS 1-${selectedPlaylist?.tracks.total}`}
+                value={numberOfTracks}
+                onChange={handleNumberOfSongschange}
+                maxLength={2}
+              />
+            </div>
+            </div>
+            <div className={styles.buttonContainer}>
+              <button className={styles.button} onClick={handleStartClick}>Start game!</button>
+            </div>
+            <div className={styles.optionsRow}>
+              <div className={styles.sidePanel}>
+                <h3 className={styles.h3}>Join with code: {helper.getCookie("SID")}</h3>
+                <section className={styles.textSetction}>
+                  The aim of the game is to guess the names of the songs being played.
+                  If multiple players get the same song right, the faster answers will get more
+                  points. The player with the most points after the last song wins! Good luck!
+                </section>
+              </div>
+              <div className={styles.sidePanel}>
+                {players.length > 0 ? (
+                  <>
+                    <h2 className={styles.h3}>Players</h2>
+                    <ul className={styles.playerList}>
+                      {players.map((player) => (
+                        <li className={styles.playersListItem} key={player.name}>{player.name}</li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  <h2 className={styles.h3}>Waiting for players to join...</h2>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+        {gameStarted && (
+          <Game
+            getNextTrack={getNextTrack}
+            connection={connection.current}
+            accessToken={helper.getCookie("token")}
+            players={players}
+            playlistUri={selectedPlaylist.uri}
+            setPlayers={setPlayers}
+          />
+        )}
+      </PageContents>
     </>
   );
 };

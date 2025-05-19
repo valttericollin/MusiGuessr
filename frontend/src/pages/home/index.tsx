@@ -3,15 +3,16 @@ import PageContents from "../../components/PageContents";
 import styles from "./Home.module.css";
 
 const Home = () => {
+
   return (
     <>
       <PageContents>
         <div className={styles.container}>
-          <div>
-            <Link to="/createlobby">Create Lobby</Link>
+          <div className={styles.buttonContainer}>
+            <Link className={styles.button} to="/createlobby"  /* onClick={handleCreateLobbyClick} */>Create Lobby</Link>
           </div>
-          <div>
-            <Link to="/joinlobby">Join Lobby</Link>
+          <div className={styles.buttonContainer}>
+            <Link className={styles.button} to="/joinlobby">Join Lobby </Link>
           </div>
           <Outlet />
         </div>

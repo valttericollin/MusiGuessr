@@ -4,13 +4,12 @@
   max-width: 1400px;
   min-height: 70vh;
   height: auto;
+  justify-content: center;
+  /* align-items: center; */
+  margin-top: 100px;
   padding: 0px;
   color: var(--black);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-
-  @media (min-width: 768px) {
-    margin: 3rem auto;
-  }
 }
 
 .container * {

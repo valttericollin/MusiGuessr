@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 import PlayerView from "../../components/PlayerView";
+import PageContents from "../../components/PageContents";
+import styles from "./JoinLobby.module.css";
 
 const JoinLobby = () => {
   const [roomCode, setRoomCode] = useState();
@@ -32,30 +34,34 @@ const JoinLobby = () => {
 
   return (
     <>
-      {!connected && (
-        <div>
-          <form onSubmit={SubmitAction}>
-            <h2>ROOM CODE</h2>
-            <input
-              placeholder="ENTER 4-LETTER CODE"
-              value={roomCode}
-              onChange={(event) => setRoomCode(event.target.value)}
-              maxLength={4}
-            />
-            <h2>NAME</h2>
-            <input
-              placeholder="ENTER NAME"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              maxLength={16}
-            />
-            <div>
-              <button type="submit">PLAY</button>
-            </div>
-          </form>
-        </div>
-      )}
-      {connected && <PlayerView connection={connection.current} name={name} />}
+      <PageContents>
+        {!connected && (
+          <div className={styles.container}>
+            <form className={styles.formContainer} onSubmit={SubmitAction}>
+              <h2 className={styles.h2}>ROOM CODE</h2>
+              <input
+                className={styles.inputContainer}
+                placeholder="ENTER 4-LETTER CODE"
+                value={roomCode}
+                onChange={(event) => setRoomCode(event.target.value)}
+                maxLength={4}
+              />
+              <h2 className={styles.h2}>NAME</h2>
+              <input
+                className={styles.inputContainer}
+                placeholder="ENTER NAME"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                maxLength={16}
+              />
+              <div className={styles.buttonContainer}>
+                <button className={styles.button} type="submit">PLAY</button>
+              </div>
+            </form>
+          </div>
+        )}
+        {connected && <PlayerView connection={connection.current} name={name} />}
+      </PageContents>
     </>
   );
 };

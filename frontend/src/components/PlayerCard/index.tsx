@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import styles from "./PlayerCard.module.css"
 
 interface PlayerCardProps {
   name: string;
@@ -16,6 +17,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
   const [displayScore, setDisplayScore] = useState(score);
 
   useEffect(() => {
+    // update score incrementally
     if (displayScore === score) return;
 
     const difference = score - displayScore;
@@ -45,12 +47,12 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
   return (
     <>
       {!showAnswers && (
-        <div style={{ color: currentRoundAnswer !== "" ? "white" : "gray" }}>
+        <div className={currentRoundAnswer !== "" ? styles.playerCardWithAnswer : styles.playerCard}>
           {name} Score: {displayScore}
         </div>
       )}
       {showAnswers && (
-        <div style={{ color: currentRoundAnswer !== "" ? "white" : "gray" }}>
+        <div className={currentRoundAnswer !== "" ? styles.playerCardWithAnswer : styles.playerCard}>
           {name} Score: {displayScore} Answer:{" "}
           {currentRoundAnswer != "" ? currentRoundAnswer : "..."}
         </div>

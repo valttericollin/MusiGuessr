@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import PlayerContainer from "../PlayerContainer";
+import SpinningRecord from "../SpinningRecord";
 import helper from "../../misc/helper";
 
 interface gameProps {
@@ -69,7 +70,7 @@ const Game: React.FC<gameProps> = ({
         pausePlayback();
         setTrackPlaying(false);
         setShowAnswers(true);
-      }, 10000);
+      }, 20000); // Stop playback after 20s
     }
   }, [track, trackPlaying, startPlaybackFlag]);
 
@@ -86,7 +87,6 @@ const Game: React.FC<gameProps> = ({
   }, [showAnswers]);
 
   const updateScores = () => {
-    // Todo: fix
     let score = 10;
     const orderedTimeStamps: { timeStamp: number; name: string }[] = [];
 
@@ -169,9 +169,15 @@ const Game: React.FC<gameProps> = ({
   return (
     <>
       <div>
+        <h1></h1>
+      </div>
+      <div>
+        <SpinningRecord isSpinning={trackPlaying} />
+      </div>
+      <div>
         {<PlayerContainer players={players} showAnswers={showAnswers} />}
       </div>
-      <div>{finalScoreView && <PlayerContainer players={players} showAnswers={showAnswers}/>}</div>
+      {/* <div>{finalScoreView && <PlayerContainer players={players} showAnswers={showAnswers}/>}</div> */}
     </>
   );
 };

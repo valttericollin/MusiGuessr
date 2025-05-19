@@ -27,7 +27,6 @@ const PlayerContainer: React.FC<PlayerContainerProps> = ({
 
   return (
     <div>
-      <h1>Final Scores</h1>
       <ul className={styles.playerList}>
         {sortedPlayers.map((player) => (
           <li key={player.name} className={styles.playerListItem}>

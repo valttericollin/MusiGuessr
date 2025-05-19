@@ -1,4 +1,10 @@
 .topbar {
+  position: fixed;           /* Stick to top */
+  top: 0;                    /* Align to top edge */
+  left: 0;                   /* Align to left edge */
+  right: 0;                  /* Stretch full width */
+  z-index: 1000;             /* Ensure it's above other content */
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -7,28 +13,20 @@
   background-color: rgb(41, 0, 136);
 }
 
+
+
+
+
+/* .topbar {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  padding: 0 2rem;
+  background-color: rgb(41, 0, 136);
+} */
+
 .h1 {
   color: inherit;
 }
-
-/* .topbar .logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #fff;
-}
-
-.topbar .nav-links {
-    display: flex;
-    gap: 1rem;
-}
-
-.topbar .nav-links a {
-    color: #fff;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s;
-}
-
-.topbar .nav-links a:hover {
-    color: #00bcd4;
-} */
