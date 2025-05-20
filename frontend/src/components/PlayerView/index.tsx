@@ -8,6 +8,7 @@ interface PlayerViewProps {
 
 const PlayerView: React.FC<PlayerViewProps> = ({ connection, name }) => {
   const [waitingForGameStart, setWaitingForGameStart] = useState(true);
+  const [gameOver, setGameOver] = useState(false);
   const [submitFormOpen, setsubmitFormOpen] = useState(false);
   const [answer, setAnswer] = useState("");
 
@@ -46,9 +47,17 @@ const PlayerView: React.FC<PlayerViewProps> = ({ connection, name }) => {
         setWaitingForGameStart(false);
         break;
 
+      case "end":
+        setGameOver(true);
+        break;
+
+      case "reset":
+        setWaitingForGameStart(true);
+        setGameOver(false);
+        break;
+
       default:
         console.log("Unrecognized message type");
-      // handle -->
     }
   };
 
@@ -56,6 +65,7 @@ const PlayerView: React.FC<PlayerViewProps> = ({ connection, name }) => {
     <>
       <div>
         {waitingForGameStart && <h2 className={styles.h2}>Waiting for host to start the game.</h2>}
+        {gameOver && <h2 className={styles.h2}>Game over. Thanks for playing!</h2>}
         {submitFormOpen && (
           <form className={styles.formContainer} onSubmit={handleSubmit}>
             <input
@@ -70,7 +80,7 @@ const PlayerView: React.FC<PlayerViewProps> = ({ connection, name }) => {
             </div>
           </form>
         )}
-        {!submitFormOpen && !waitingForGameStart && <h2 className={styles.h2}>Answer submitted. Waiting for next song.</h2>}
+        {!submitFormOpen && !waitingForGameStart && !gameOver && <h2 className={styles.h2}>Answer submitted. Waiting for next song.</h2>}
       </div>
     </>
   );

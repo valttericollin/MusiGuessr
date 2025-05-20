@@ -57,6 +57,12 @@ const Game: React.FC<gameProps> = ({
       setNextTrackFlag(false);
       if (nextTrack === undefined || nextTrack === null) {
         setFinalScoreView(true);
+        const msg = {
+          type: "gameState",
+          action: "end",
+        };
+        // Signal player clients of game ending.
+        connection.send(JSON.stringify(msg));
         setTimeout(() => {
           setShowBackToLobbyButton(true);
         }, 5000);
@@ -208,6 +214,12 @@ const Game: React.FC<gameProps> = ({
       })
     )
     setGameStarted(false);
+    const msg = {
+      type: "gameState",
+      action: "reset",
+    };
+    // Signal player to wait for host again.
+    connection.send(JSON.stringify(msg));
     };
 
   return (
